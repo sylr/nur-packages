@@ -26,7 +26,7 @@ jobs:
         # Github found at
         # https://github.com/<your_githubname>/nur-packages/settings/secrets
         cachixName:
-          - <YOUR_CACHIX_NAME>
+          - sylr-nur-packages
         nixPath:
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-unstable.tar.gz
@@ -77,4 +77,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Trigger NUR update
-      run: curl -fsS -XPOST "https://nur-update.nix-community.org/update?repo=sylr"
+      run: curl -sS -XPOST "https://nur-update.nix-community.org/update?repo=sylr"
