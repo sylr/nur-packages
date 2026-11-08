@@ -68,11 +68,49 @@ jobs:
           -I $PWD
     - name: Build nix packages
       run: nix shell -f '<nixpkgs>' nix-build-uncached -c nix-build-uncached ci.nix -A cacheOutputs
+  # Build the flake outputs, pinned by flake.lock, and push them to Cachix.
+  # These are the exact store paths that `github:sylr/nur-packages#<name>`
+  # and flake inputs resolve to, so machines that use the cache download
+  # them instead of compiling. The `tests` job builds against channels
+  # instead, which give different store paths.
+  flake:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-26.04     # x86_64-linux
+          - ubuntu-26.04-arm # aarch64-linux
+          - macos-latest     # aarch64-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+    - name: Install nix
+      uses: cachix/install-nix-action@v31
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    - name: Setup cachix
+      uses: cachix/cachix-action@v16
+      with:
+        name: sylr-nur-packages
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - name: Build flake packages
+      # bash (not the default) runs with -o pipefail, so a failing
+      # `nix eval` fails the step instead of building nothing.
+      shell: bash
+      run: |
+        system=$(nix eval --impure --raw --expr builtins.currentSystem)
+        nix eval --json ".#packages.$system" --apply builtins.attrNames \
+          | jq -r --arg s "$system" '.[] | ".#packages.\($s).\(.)"' \
+          | xargs -r nix build --no-link -L
   # Notify NUR once, after every matrix job succeeded, and not for pull
   # requests. The repo name is the one in
   # https://github.com/nix-community/NUR/blob/main/repos.json
   nur-update:
-    needs: tests
+    needs: [tests, flake]
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
