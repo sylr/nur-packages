@@ -9,22 +9,22 @@
 let
   inherit (stdenvNoCC.hostPlatform) system;
   shaMap = {
-    x86_64-linux = "1nm702sl1mxrm0c1qv9lhp5zqd0h6wlnyha35x20xvjxhcfnr2h1";
-    aarch64-linux = "05my88shdzdvq404ih8yvdvrhrvijylynn96m2zl6914vkgqlwjs";
-    x86_64-darwin = "0w4h790ckb9v0za72sh99rg3y5qkrn3xz9z8q4bi0917v0qijdg0";
-    aarch64-darwin = "1472r9ppap8hxk11zyji77gq884wrvsm6jm6j5lksy1snrq0abhi";
+    x86_64-linux = "16rmbf1kq1hqhqfka1wrdj1j9q87ah6dlf4kn764pzzgg8ps2q0n";
+    aarch64-linux = "1vrpcna8w0j8dghl97x5n47blj2b029y2s7rmvc155q2lq19nw1z";
+    x86_64-darwin = "1ix6y4rvarcxsp4ygxjaqzrvar957afsn7jcqik7d5my38s87mhg";
+    aarch64-darwin = "17mb1v389lljyzwhp7vlq4j9c9dpbfchmphh3cwkkrv5wch1wmzn";
   };
 
   urlMap = {
-    x86_64-linux = "https://github.com/sylr/op-broker/releases/download/v0.1.0/op-broker_v0.1.0_linux_amd64.tar.gz";
-    aarch64-linux = "https://github.com/sylr/op-broker/releases/download/v0.1.0/op-broker_v0.1.0_linux_arm64.tar.gz";
-    x86_64-darwin = "https://github.com/sylr/op-broker/releases/download/v0.1.0/op-broker_v0.1.0_darwin_amd64.tar.gz";
-    aarch64-darwin = "https://github.com/sylr/op-broker/releases/download/v0.1.0/op-broker_v0.1.0_darwin_arm64.tar.gz";
+    x86_64-linux = "https://github.com/sylr/op-broker/releases/download/v0.1.1/op-broker_v0.1.1_linux_amd64.tar.gz";
+    aarch64-linux = "https://github.com/sylr/op-broker/releases/download/v0.1.1/op-broker_v0.1.1_linux_arm64.tar.gz";
+    x86_64-darwin = "https://github.com/sylr/op-broker/releases/download/v0.1.1/op-broker_v0.1.1_darwin_amd64.tar.gz";
+    aarch64-darwin = "https://github.com/sylr/op-broker/releases/download/v0.1.1/op-broker_v0.1.1_darwin_arm64.tar.gz";
   };
 in
 stdenvNoCC.mkDerivation {
   pname = "op-broker";
-  version = "0.1.0";
+  version = "0.1.1";
   src = fetchurl {
     url = urlMap.${system};
     sha256 = shaMap.${system};
