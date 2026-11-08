@@ -3,7 +3,8 @@
 # so if you correctly mark packages as
 #
 # - broken (using `meta.broken`),
-# - unfree (using `meta.license.free`), and
+# - unfree (using `meta.license.free`),
+# - limited to some platforms (using `meta.platforms`), and
 # - locally built (using `preferLocalBuild`)
 #
 # then your CI will be able to build and cache only those packages for
@@ -18,7 +19,11 @@ let
   isBuildable = p: let
     licenseFromMeta = p.meta.license or [];
     licenseList = if builtins.isList licenseFromMeta then licenseFromMeta else [licenseFromMeta];
-  in !(p.meta.broken or false) && builtins.all (license: license.free or true) licenseList;
+  in !(p.meta.broken or false)
+    && builtins.all (license: license.free or true) licenseList
+    # GoReleaser sets meta.platforms to the released os/arch pairs, e.g.
+    # darwin-only for op-cached, which can't be built on a Linux runner.
+    && pkgs.lib.meta.availableOn pkgs.stdenv.hostPlatform p;
   isCacheable = p: !(p.preferLocalBuild or false);
   shouldRecurseForDerivations = p: isAttrs p && p.recurseForDerivations or false;
 

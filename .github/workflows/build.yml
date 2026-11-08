@@ -15,13 +15,6 @@ jobs:
   tests:
     strategy:
       matrix:
-        # Set this to notify the global nur package registry that changes are
-        # available.
-        #
-        # The repo name as used in
-        # https://github.com/nix-community/NUR/blob/master/repos.json
-        nurRepo:
-          - <YOUR_REPO_NAME>
         # Set this to cache your build results in cachix for faster builds
         # in CI and for everyone who uses your cache.
         #
@@ -38,7 +31,12 @@ jobs:
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-unstable.tar.gz
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-26.05.tar.gz
-    runs-on: ubuntu-latest
+        # macos-latest (aarch64-darwin) builds the darwin-only packages,
+        # which ci.nix skips on Linux.
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
@@ -70,7 +68,13 @@ jobs:
           -I $PWD
     - name: Build nix packages
       run: nix shell -f '<nixpkgs>' nix-build-uncached -c nix-build-uncached ci.nix -A cacheOutputs
+  # Notify NUR once, after every matrix job succeeded, and not for pull
+  # requests. The repo name is the one in
+  # https://github.com/nix-community/NUR/blob/main/repos.json
+  nur-update:
+    needs: tests
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
     - name: Trigger NUR update
-      # Don't replace <YOUR_REPO_NAME> here!
-      if: ${{ matrix.nurRepo != '<YOUR_REPO_NAME>' }}
-      run: curl -XPOST "https://nur-update.nix-community.org/update?repo=${{ matrix.nurRepo }}"
+      run: curl -fsS -XPOST "https://nur-update.nix-community.org/update?repo=sylr"
