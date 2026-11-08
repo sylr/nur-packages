@@ -14,6 +14,9 @@ on:
 jobs:
   tests:
     strategy:
+      # Let every channel and OS finish: one channel's failure must not
+      # cancel (and hide the result of) the others.
+      fail-fast: false
       matrix:
         # Set this to cache your build results in cachix for faster builds
         # in CI and for everyone who uses your cache.
