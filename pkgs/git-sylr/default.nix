@@ -37,26 +37,12 @@ git.overrideAttrs (old: rec {
   # separateDebugInfo exports $debug (the debug output path), which git's
   # test suite reads as --debug; its extra output then breaks TAP parsing.
   installCheckFlags = (old.installCheckFlags or [ ])
-    ++ lib.optional (!lib.elem "debug=" (old.installCheckFlags or [ ])) "debug="
-    # TEMPORARY (PR #16 diagnostics, revert before merging), see failureHook.
-    ++ [ "GIT_TEST_OPTS=--verbose-log -x" ];
+    ++ lib.optional (!lib.elem "debug=" (old.installCheckFlags or [ ])) "debug=";
   # t1517 fails because `git gui--askyesno` is installed; the upstream fix
   # (dropped above) no longer applies to 2.56 and was never merged.
   # disable_test comes from the nixpkgs recipe and tolerates repeats.
   preInstallCheck = (old.preInstallCheck or "") + ''
     disable_test t1517-outside-repo
-  '';
-
-  # TEMPORARY (PR #16 diagnostics, revert before merging): with
-  # GIT_TEST_OPTS (set in installCheckFlags above), keep a verbose, traced
-  # log per test script and print the t1017 and t7300 ones if the build
-  # fails, so the Linux-only failures show up in the Actions log.
-  failureHook = ''
-    for f in t/test-results/t1017-*.out t/test-results/t7300-*.out; do
-      [ -e "$f" ] || continue
-      echo "===== $f ====="
-      cat "$f"
-    done
   '';
 
   # A GitHub tarball has neither the generated ./configure nor the
