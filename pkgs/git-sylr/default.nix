@@ -14,13 +14,13 @@
 
 git.overrideAttrs (old: rec {
   pname = "git-sylr";
-  version = "2.56.1+sylr.1";
+  version = "2.56.1+sylr.2";
 
   src = fetchFromGitHub {
     owner = "sylr";
     repo = "git";
     tag = "v${version}";
-    hash = "sha256-eUNnvH+J9O7oDBj8DGW03OByh92zAIogsPjl75PlGjw=";
+    hash = "sha256-+O+1I8ZnDowjYTWz83kW06OdmxAuVzuKeTHesAf6PMU=";
   };
 
   # Older nixpkgs revisions (flake.lock, nixos-26.05) carry backports for
